@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>KGS Shop Monitor</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">KGS BILLING SYSTEM</p>
+      <h1>Shop Monitor</h1>
+    </div>
+    <div class="auth">
+      <label for="admin-token">Admin API token</label>
+      <input id="admin-token" type="password" autocomplete="off" placeholder="Enter dashboard admin token">
+      <button id="connect-button" class="button secondary">Connect</button>
+    </div>
+  </header>
+
+  <main>
+    <p id="notice" class="notice" role="status" aria-live="polite"></p>
+
+    <section class="summary" aria-label="Shop totals">
+      <article class="stat"><span>Total shops</span><strong id="total-count">--</strong></article>
+      <article class="stat online"><span>Online</span><strong id="online-count">--</strong></article>
+      <article class="stat offline"><span>Offline</span><strong id="offline-count">--</strong></article>
+      <article class="stat"><span>Heartbeat window</span><strong id="online-window">--</strong></article>
+    </section>
+
+    <section class="panel">
+      <div class="section-heading">
+        <div><p class="eyebrow">FLEET</p><h2>Registered shops</h2></div>
+        <button id="refresh-button" class="button secondary">Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th><input id="select-all" type="checkbox" aria-label="Select all shops"></th>
+              <th>Shop ID</th><th>Shop name</th><th>Installed version</th><th>Status</th><th>Last heartbeat</th><th>Assigned update</th><th>Credentials</th>
+            </tr>
+          </thead>
+          <tbody id="shops-body"><tr><td colspan="8" class="empty">Connect to load shops.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="columns">
+      <section class="panel">
+        <p class="eyebrow">RELEASES</p>
+        <h2>Publish Windows update</h2>
+        <p class="help">Choose the Windows NSIS installer (.exe). The service calculates its SHA-512, generates <code>latest.yml</code>, and publishes both assets to the configured GitHub release. Arbitrary ZIP replacement is intentionally not supported.</p>
+        <form id="release-form">
+          <label>Version tag <input name="version" required placeholder="v1.1.0" pattern="v?[0-9]+\.[0-9]+\.[0-9]+([+-][A-Za-z0-9.-]+)?"></label>
+          <label>Release notes <textarea name="notes" required rows="4" maxlength="20000" placeholder="What changed in this release?"></textarea></label>
+          <label>Windows NSIS installer (.exe) <input name="installer" type="file" accept=".exe" required></label>
+          <button class="button primary" type="submit">Publish to GitHub Releases</button>
+          <div id="release-upload-progress" class="upload-progress" hidden>
+            <div class="upload-progress-heading">
+              <span id="release-upload-message" role="status" aria-live="polite">Preparing upload.</span>
+              <strong id="release-upload-percent">0%</strong>
+            </div>
+            <progress id="release-upload-bar" max="100" value="0" aria-label="Installer upload progress"></progress>
+            <div class="upload-progress-metrics">
+              <span id="release-upload-speed">Speed: --</span>
+              <span id="release-upload-eta">ETA: --</span>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <p class="eyebrow">PROVISIONING</p>
+        <h2>Register a shop</h2>
+        <p class="help">A unique bearer token is generated for each installation and shown once. Keep the token private and install its config in the shop’s Electron user-data folder.</p>
+        <form id="shop-form">
+          <label>Shop ID <input name="shopId" required maxlength="64" pattern="[A-Za-z0-9][A-Za-z0-9._-]{0,63}" placeholder="SHOP-001"></label>
+          <label>Shop name <input name="shopName" required maxlength="120" placeholder="Main Street Store"></label>
+          <button class="button primary" type="submit">Create shop credentials</button>
+        </form>
+        <pre id="shop-config" class="secret-config" hidden></pre>
+        <button id="copy-config" class="button secondary" type="button" hidden>Copy config JSON</button>
+      </section>
+    </div>
+
+    <section class="panel">
+      <div class="section-heading">
+        <div><p class="eyebrow">TARGETING</p><h2>Published releases</h2></div>
+        <button id="push-button" class="button primary" disabled>Push update to selected shops</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th>Version</th><th>Tag</th><th>GitHub release</th><th>Published</th><th>Assigned shops</th></tr></thead>
+          <tbody id="releases-body"><tr><td colspan="6" class="empty">No releases loaded.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer>Install only releases built and published by your trusted build pipeline. Serve this dashboard through HTTPS; do not expose its admin token or GitHub token in client code.</footer>
+  </main>
+  <script src="./app.js" defer></script>
+</body>
+</html>

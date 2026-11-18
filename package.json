@@ -1,0 +1,7 @@
+{
+  "name": "kgs-admin-dashboard",
+  "private": true,
+  "scripts": {
+    "start": "py app.py"
+  }
+}
